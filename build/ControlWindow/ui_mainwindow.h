@@ -13,7 +13,6 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
@@ -36,8 +35,7 @@ public:
     QAction *actionStop;
     QAction *actionStart_2;
     QWidget *centralWidget;
-    QHBoxLayout *horizontalLayout;
-    ScreenWidget *ScreenW;
+    ScreenWidget *ScreenBox;
     QMenuBar *menuBar;
     QMenu *menuKeyHook;
     QMenu *menuAction1;
@@ -49,7 +47,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::ApplicationModal);
-        MainWindow->resize(400, 300);
+        MainWindow->resize(482, 289);
         actionStartHook = new QAction(MainWindow);
         actionStartHook->setObjectName(QStringLiteral("actionStartHook"));
         actionStopHook = new QAction(MainWindow);
@@ -73,24 +71,21 @@ public:
         actionStart_2->setCheckable(true);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        horizontalLayout = new QHBoxLayout(centralWidget);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        ScreenW = new ScreenWidget(centralWidget);
-        ScreenW->setObjectName(QStringLiteral("ScreenW"));
-        QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        ScreenBox = new ScreenWidget(centralWidget);
+        ScreenBox->setObjectName(QStringLiteral("ScreenBox"));
+        ScreenBox->setEnabled(true);
+        ScreenBox->setGeometry(QRect(0, 0, 461, 241));
+        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(ScreenW->sizePolicy().hasHeightForWidth());
-        ScreenW->setSizePolicy(sizePolicy);
-
-        horizontalLayout->addWidget(ScreenW);
-
+        sizePolicy.setHeightForWidth(ScreenBox->sizePolicy().hasHeightForWidth());
+        ScreenBox->setSizePolicy(sizePolicy);
+        ScreenBox->setMinimumSize(QSize(100, 100));
+        ScreenBox->setMouseTracking(true);
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 21));
+        menuBar->setGeometry(QRect(0, 0, 482, 21));
         menuKeyHook = new QMenu(menuBar);
         menuKeyHook->setObjectName(QStringLiteral("menuKeyHook"));
         menuAction1 = new QMenu(menuBar);

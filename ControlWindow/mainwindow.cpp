@@ -13,33 +13,36 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //ui->screenBox->installEventFilter(this);
+    QScreen *screen = QGuiApplication::primaryScreen();
+    SCREEN_WIDTH = screen->size().width();
+    SCREEN_HEIGHT = screen->size().height();
+    ui->ScreenBox->installEventFilter(this);
     connect(&thr_Hook,&QThread::finished,&HookObject,&HookThreadObject::finish);
     connect(this,&MainWindow::SetMouseHook,&HookObject,&HookThreadObject::SetMouseHook);
     connect(this,&MainWindow::ReleaseMouseHook,&HookObject,&HookThreadObject::ReleaseMouseHook);
     connect(this,&MainWindow::SetKeyboardHook,&HookObject,&HookThreadObject::SetKeyboardHook);
     connect(this,&MainWindow::ReleaseKeyboardHook,&HookObject,&HookThreadObject::ReleaseKeyboardHook);
-    //connect(&ScreenObject,&ScreenMaker::DrawPixmap,this,&MainWindow::DrawPixmap,Qt::DirectConnection);
+    connect(this,&MainWindow::SetScreencastState,&ScreenObject,&ScreenMaker::SetTimerState);
+    connect(&ScreenObject,&ScreenMaker::DrawPixmap,this,&MainWindow::DrawPixmap);
     //connect(ui->actionStart_2,&QAction::triggered,&ScreenObject,&ScreenMaker::setRuning);
     HookObject.moveToThread(&thr_Hook);
-    ScreenObject.moveToThread(&thr_Screen);
+    //ScreenObject.moveToThread(&thr_Screen);
     thr_Hook.start();
-    thr_Screen.start();
-    QTimer *Timer = new QTimer(this);
-    connect(Timer, SIGNAL(timeout()),this,SLOT(DrawPixmap()));
-    Timer->start(40);
+    //thr_Screen.start();
 }
 
 MainWindow::~MainWindow()
 {
+    emit SetScreencastState(false);
+    //QThread::sleep(1);
     delete ui;
     thr_Hook.terminate();
-    thr_Screen.terminate();
+    //thr_Screen.terminate();
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-  /*if (qobject_cast<QLabel*>(obj)==ui->screenBox) {
+  if (qobject_cast<QGLWidget*>(obj)==ui->ScreenBox) {
       SendMouseStruct sms;
       sms.mouseData=0;
       sms.dx=0;
@@ -47,8 +50,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
       bool mouse =false;
       if (event->type()==QEvent::MouseMove) {
           QMouseEvent *me = static_cast<QMouseEvent*>(event);
-          sms.dx = (double)me->x()/ui->screenBox->width()*65535;
-          sms.dy = (double)me->y()/ui->screenBox->height()*65535;
+          sms.dx = (double)me->x()/ui->ScreenBox->width()*65535;
+          sms.dy = (double)me->y()/ui->ScreenBox->height()*65535;
           sms.flags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
           mouse=true;
       }
@@ -97,17 +100,15 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
       }
 
       if (mouse) {
-          //qDebug()<< sms.dx<< " "<<sms.dy<<" "<<sms.flags <<" "<< sms.mouseData;
+//          qDebug()<< sms.dx<< " "<<sms.dy<<" "<<sms.flags <<" "<< sms.mouseData;
       }
   }
-  return false;*/
+  return false;
 }
 
-void MainWindow::DrawPixmap()
+void MainWindow::DrawPixmap(QPixmap *pixmap)
 {
-    QPixmap pix(100,100);
-    pix.fill(QColor(qrand()%255,qrand()%255,qrand()%255));
-    ui->ScreenW->DrawPixmap(&pix);
+    ui->ScreenBox->DrawPixmap(pixmap);
 }
 
 void MainWindow::on_actionStartHook_triggered()
@@ -135,6 +136,14 @@ void MainWindow::on_actionStart_triggered()
 void MainWindow::on_actionStop_triggered()
 {
     emit ReleaseMouseHook();
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    double mx = (double)ui->centralWidget->size().width()/SCREEN_WIDTH;
+    double my = (double)ui->centralWidget->size().height()/SCREEN_HEIGHT;
+    double m = qMin(mx, my);
+    ui->ScreenBox->resize(SCREEN_WIDTH*m,SCREEN_HEIGHT*m);
 }
 
 void MainWindow::on_actionAction1_triggered()
@@ -209,3 +218,8 @@ void MainWindow::on_actionAction_triggered()
 
 }
 
+
+void MainWindow::on_actionStart_2_triggered(bool checked)
+{
+    emit SetScreencastState(checked);
+}

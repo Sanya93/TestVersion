@@ -8,7 +8,8 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QPixmap>
-#include <QOpenGLTexture>
+#include <QScreen>
+#include <QGuiApplication>
 
 class ScreenWidget : public QGLWidget
 {
@@ -22,11 +23,12 @@ protected:
     void paintGL();
 private:
     void makeObject();
-    QOpenGLTexture *texture;
+    //QOpenGLTexture *texture;
     QOpenGLShaderProgram *program;
     QOpenGLBuffer vbo;
     QColor clearColor;
     QOpenGLFunctions* f;
+    GLuint texId;
 };
 
 #endif // SCREENWIDGET_H

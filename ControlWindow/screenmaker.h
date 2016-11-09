@@ -19,16 +19,18 @@ public:
     //bool Runing() const;
 
 signals:
-    //void DrawPixmap(QPixmap *pixmap);
+    void DrawPixmap(QPixmap *pixmap);
     //void RuningChanged(bool Runing);
 
 public slots:
     //void setRuning(bool Runing);
+    void SetTimerState(bool state);
 private slots:
-    //void TimerCallback();
+    void TimerCallback();
 private:
         QTimer* Timer;
-        //QPixmap ScreenPixmap;
+        int index=0;
+        QPixmap *ScreenPixmap[2];
 };
 
 #endif // SCREENMAKER_H

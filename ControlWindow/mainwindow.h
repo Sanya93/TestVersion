@@ -35,8 +35,9 @@ private:
     QThread thr_Screen;
     HookThreadObject HookObject;
     ScreenMaker ScreenObject;
+    int SCREEN_WIDTH = 1, SCREEN_HEIGHT = 1;
 public slots:
-    void DrawPixmap();
+    void DrawPixmap(QPixmap *pixmap);
 private slots:
     void on_actionThrottle_triggered(bool checked);
     void on_actionStartHook_triggered();
@@ -46,12 +47,15 @@ private slots:
     void on_actionAction_triggered();
     void on_actionStart_triggered();
     void on_actionStop_triggered();
+    void resizeEvent(QResizeEvent *event);
+    void on_actionStart_2_triggered(bool checked);
 
 signals:
     void SetMouseHook();
     void ReleaseMouseHook();
     void SetKeyboardHook();
     void ReleaseKeyboardHook();
+    void SetScreencastState(bool state);
 };
 
 #endif // MAINWINDOW_H

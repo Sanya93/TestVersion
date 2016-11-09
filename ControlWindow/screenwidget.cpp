@@ -11,14 +11,14 @@ ScreenWidget::~ScreenWidget()
 {
     makeCurrent();
     vbo.destroy();
-    delete texture;
     delete program;
     doneCurrent();
 }
 
 void ScreenWidget::DrawPixmap(QPixmap *pixmap)
 {
-    texture = new QOpenGLTexture(pixmap->toImage().mirrored());
+    texId = bindTexture(*pixmap);
+//    delete pixmap;
     update();
 }
 
@@ -30,8 +30,8 @@ void ScreenWidget::initializeGL()
     f->glEnable(GL_DEPTH_TEST);
     f->glEnable(GL_CULL_FACE);
 
-#define PROGRAM_VERTEX_ATTRIBUTE 0
-#define PROGRAM_TEXCOORD_ATTRIBUTE 1
+    #define PROGRAM_VERTEX_ATTRIBUTE 0
+    #define PROGRAM_TEXCOORD_ATTRIBUTE 1
 
     QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, this);
     const char *vsrc =
@@ -68,8 +68,7 @@ void ScreenWidget::initializeGL()
 
 void ScreenWidget::resizeGL(int width, int height)
 {
-    int side = qMin(width, height);
-    f->glViewport((width - side) / 2, (height - side) / 2, side, side);
+    f->glViewport(0, 0, width, height);
 }
 
 void ScreenWidget::paintGL()
@@ -81,9 +80,8 @@ void ScreenWidget::paintGL()
     program->enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
     program->setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT, 0, 3, 5 * sizeof(GLfloat));
     program->setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
-    texture->bind();
-
-    f->glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    f->glBindTexture(GL_TEXTURE_2D, texId);
+    f->glDrawArrays(GL_QUADS, 0, 4);
 }
 
 void ScreenWidget::makeObject()
@@ -94,8 +92,8 @@ void ScreenWidget::makeObject()
         { -1, -1, 0 },
         { +1, -1, 0 } };
     QPixmap pixmap(100,100);
-    pixmap.fill(Qt::red);
-    texture = new QOpenGLTexture(pixmap.toImage().mirrored());
+    pixmap.fill(Qt::white);
+    texId = bindTexture(pixmap);
 
     QVector<GLfloat> vertData;
     for (int j = 0; j < 4; ++j) {
