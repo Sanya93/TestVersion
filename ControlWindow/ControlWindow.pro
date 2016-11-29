@@ -14,12 +14,10 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    hookthreadobject.cpp \
     screenwidget.cpp \
     screenmaker.cpp
 
 HEADERS  += mainwindow.h \
-    hookthreadobject.h \
     screenwidget.h \
     screenmaker.h
 

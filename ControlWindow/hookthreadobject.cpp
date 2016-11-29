@@ -1,4 +1,4 @@
-#include "hookthreadobject.h"
+/*#include "hookthreadobject.h"
 
 HookThreadObject::HookThreadObject(QObject *parent) : QObject(parent)
 {
@@ -51,3 +51,4 @@ void HookThreadObject::MouseHookCallback(MouseHInfo mi)
 {
     qDebug() << mi.Point.x << " " << mi.Point.y << " " << mi.wParam;
 }
+*/

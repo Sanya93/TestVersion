@@ -17,16 +17,11 @@ MainWindow::MainWindow(QWidget *parent) :
     SCREEN_WIDTH = screen->size().width();
     SCREEN_HEIGHT = screen->size().height();
     ui->ScreenBox->installEventFilter(this);
-    connect(&thr_Hook,&QThread::finished,&HookObject,&HookThreadObject::finish);
-    connect(this,&MainWindow::SetMouseHook,&HookObject,&HookThreadObject::SetMouseHook);
-    connect(this,&MainWindow::ReleaseMouseHook,&HookObject,&HookThreadObject::ReleaseMouseHook);
-    connect(this,&MainWindow::SetKeyboardHook,&HookObject,&HookThreadObject::SetKeyboardHook);
-    connect(this,&MainWindow::ReleaseKeyboardHook,&HookObject,&HookThreadObject::ReleaseKeyboardHook);
     connect(this,&MainWindow::SetScreencastState,&ScreenObject,&ScreenMaker::SetTimerState);
     connect(&ScreenObject,&ScreenMaker::DrawPixmap,this,&MainWindow::DrawPixmap);
-    HookObject.moveToThread(&thr_Hook);
+    connect(&HManager,SIGNAL(MouseRecieve(MouseInfo*)),this,SLOT(MouseHookCallback(MouseInfo*)));
+    connect(&HManager,SIGNAL(KeyboardRecieve(KeyboardInfo*)),this,SLOT(KeyHookCallback(KeyboardInfo*)));
 //    ScreenObject.moveToThread(&thr_Screen);
-    thr_Hook.start();
 //    thr_Screen.start();
 }
 
@@ -35,7 +30,6 @@ MainWindow::~MainWindow()
     emit SetScreencastState(false);
 //    QThread::sleep(1);
     delete ui;
-    thr_Hook.terminate();
 //    thr_Screen.terminate();
 }
 
@@ -112,29 +106,29 @@ void MainWindow::DrawPixmap(QPixmap *pixmap)
 
 void MainWindow::on_actionStartHook_triggered()
 {
-    emit SetKeyboardHook();
+    HManager.StartHook(RC_KEYBOARD);
 }
 
 void MainWindow::on_actionStopHook_triggered()
 {
-     emit ReleaseKeyboardHook();
+     HManager.StopHook(RC_KEYBOARD);
      ui->actionThrottle->setChecked(false);
 }
 
 void MainWindow::on_actionThrottle_triggered(bool checked)
 {
-    if (!HookObject.KeyboardBlock(checked))
+    if (!HManager.SetThrottleState(RC_KEYBOARD,checked))
         ui->actionThrottle->setChecked(false);
 }
 
 void MainWindow::on_actionStart_triggered()
 {
-    emit SetMouseHook();
+    HManager.StartHook(RC_MOUSE);
 }
 
 void MainWindow::on_actionStop_triggered()
 {
-    emit ReleaseMouseHook();
+    HManager.StopHook(RC_MOUSE);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -221,4 +215,21 @@ void MainWindow::on_actionAction_triggered()
 void MainWindow::on_actionStart_2_triggered(bool checked)
 {
     emit SetScreencastState(checked);
+}
+
+void MainWindow::MouseHookCallback(MouseInfo* mi)
+{
+    qDebug() << mi->Point.x << " " << mi->Point.y << " " << mi->wParam;
+    delete mi;
+}
+
+void MainWindow::KeyHookCallback(KeyboardInfo *ki)
+{
+    int flag = 0;
+    if (ki->wParam==257 || ki->wParam==261) flag = KEYEVENTF_KEYUP;
+    SendKeyStruct sks;
+    sks.flag = flag;
+    sks.VirtualKey = ki->VirtualKey;
+    delete ki;
+    qDebug() << "keyboard " << sks.flag << " " << sks.VirtualKey;
 }

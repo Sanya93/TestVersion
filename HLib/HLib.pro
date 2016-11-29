@@ -13,10 +13,12 @@ TEMPLATE = lib
 
 DEFINES += HLIB_LIBRARY
 
-SOURCES += hlib.cpp
+SOURCES += hlib.cpp \
+    hookbase.cpp
 
 HEADERS += hlib.h\
-        hlib_global.h
+        hlib_global.h \
+    hookbase.h
 
 unix {
     target.path = /usr/lib

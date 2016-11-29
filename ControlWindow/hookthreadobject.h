@@ -1,4 +1,4 @@
-#ifndef HOOKTHREADOBJECT_H
+/*#ifndef HOOKTHREADOBJECT_H
 #define HOOKTHREADOBJECT_H
 
 #include <QObject>
@@ -6,10 +6,7 @@
 #include <QThread>
 #include "hlib.h"
 
-struct SendKeyStruct{
-    int flag;
-    int VirtualKey;
-};
+
 
 class HookThreadObject : public QObject
 {
@@ -27,8 +24,7 @@ public slots:
     void ReleaseKeyboardHook();
 private:
     HookManager HMan;
-    static void MouseHookCallback(MouseHInfo mi);
-    static void KeyHookCallback(KeyboardHInfo ki);
+
 };
 
-#endif // HOOKTHREADOBJECT_H
+#endif // HOOKTHREADOBJECT_H*/

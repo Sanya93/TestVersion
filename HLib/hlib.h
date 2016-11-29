@@ -4,8 +4,12 @@
 #include "hlib_global.h"
 #include "windows.h"
 #include <QVector>
+#include <QThread>
+#include <QDebug>
+#include <QMessageBox>
+#include "hookbase.h"
 
-struct HLIBSHARED_EXPORT MouseHInfo
+struct HLIBSHARED_EXPORT MouseInfo
 {
 public:
     WPARAM wParam;
@@ -13,7 +17,7 @@ public:
     DWORD MouseData;
 };
 
-struct HLIBSHARED_EXPORT KeyboardHInfo
+struct HLIBSHARED_EXPORT KeyboardInfo
 {
 public:
     WPARAM wParam;
@@ -21,39 +25,62 @@ public:
     DWORD Flags;
 };
 
-class MouseHook
+class MouseHook: public HookBase
 {
+    Q_OBJECT
 public:
-    void StartHook(void (*callback)(MouseHInfo mi));
-    void StopHook();
+    explicit MouseHook(QObject *parent = 0);
+    ~MouseHook();
+signals:
+    void MouseRecieve(MouseInfo* mi);
+protected:
+    void ThrotleChangePreparing();
+    HOOKPROC getHookProc();
 private:
-    bool isHooked=false;
-    static HHOOK hHook;
-    static LRESULT CALLBACK H_MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam);
-    static void (*MouseCallback)(MouseHInfo mi);
+    static MouseHook* Self;
+    static LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam);
 };
 
-class KeyboardHook
+class KeyboardHook: public HookBase
 {
+    Q_OBJECT
 public:
-    void StartHook(void (*callback)(KeyboardHInfo ki));
-    void StopHook();
-    bool SetKeyboardThrottle(bool throttle);
+    explicit KeyboardHook(QObject *parent = 0);
+    ~KeyboardHook();
+signals:
+    void KeyboardRecieve(KeyboardInfo* ki);
+protected:
+    void ThrotleChangePreparing();
+    HOOKPROC getHookProc();
 private:
-    bool isHooked=false;
-    static HHOOK hHook;
-    static bool isReturnToSystem;
-    static LRESULT CALLBACK H_KeyHookProc(int nCode, WPARAM wParam, LPARAM lParam);
-    static void (*KeyCallback)(KeyboardHInfo ki);
-    static QVector<int> KeyBuffer;
+    static KeyboardHook* Self;
+    QVector<int> KeyBuffer;
+    static LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam);
 };
 
-class HLIBSHARED_EXPORT HookManager
+class HLIBSHARED_EXPORT HookManager: public QObject
 {
+    Q_OBJECT
 public:
-    HLib();
+    HookManager();
+    ~HookManager();
+    void StartHook(int HookType);
+    void StopHook(int HookType);
+    bool SetThrottleState(int HookType, bool NewState);
+signals:
+    void MouseRecieve(MouseInfo* mi);
+    void KeyboardRecieve(KeyboardInfo* ki);
+    void SetMouseHook();
+    void ReleaseMouseHook();
+    void SetKeyboardHook();
+    void ReleaseKeyboardHook();
+ private:
+    QThread MouseThread, KeyboardThread;
     MouseHook Mouse;
     KeyboardHook Keyboard;
+private slots:
+    void MouseSlot(MouseInfo* mi);
+    void KeyboardSlot(KeyboardInfo* ki);
 };
 
 #endif // HLIB_H

@@ -5,7 +5,7 @@
 #include <QTimer>
 #include <QPixmap>
 #include <QThread>
-#include "hookthreadobject.h"
+#include "hlib.h"
 #include "screenmaker.h"
 
 namespace Ui {
@@ -17,6 +17,11 @@ struct SendMouseStruct{
     int dy;
     int mouseData;
     int flags;
+};
+
+struct SendKeyStruct{
+    int flag;
+    int VirtualKey;
 };
 
 class MainWindow : public QMainWindow
@@ -31,9 +36,8 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 private:
     Ui::MainWindow *ui;
-    QThread thr_Hook;
+    HookManager HManager;
     QThread thr_Screen;
-    HookThreadObject HookObject;
     ScreenMaker ScreenObject;
     int SCREEN_WIDTH = 1, SCREEN_HEIGHT = 1;
 public slots:
@@ -49,12 +53,9 @@ private slots:
     void on_actionStop_triggered();
     void resizeEvent(QResizeEvent *event);
     void on_actionStart_2_triggered(bool checked);
-
+    void MouseHookCallback(MouseInfo *mi);
+    void KeyHookCallback(KeyboardInfo* ki);
 signals:
-    void SetMouseHook();
-    void ReleaseMouseHook();
-    void SetKeyboardHook();
-    void ReleaseKeyboardHook();
     void SetScreencastState(bool state);
 };
 

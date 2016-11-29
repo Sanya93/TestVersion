@@ -1,137 +1,169 @@
 #include "hlib.h"
-#include <QDebug>
-#include <QMessageBox>
 
-HHOOK MouseHook::hHook;
-void (*MouseHook::MouseCallback)(MouseHInfo mi);
-HHOOK KeyboardHook::hHook;
-bool KeyboardHook::isReturnToSystem = true;
-void (*KeyboardHook::KeyCallback)(KeyboardHInfo ki);
-QVector<int> KeyboardHook::KeyBuffer=QVector<int>(256,0);
+KeyboardHook* KeyboardHook::Self;
+MouseHook* MouseHook::Self;
 
-void MouseHook::StartHook(void (*callback)(MouseHInfo))
+MouseHook::MouseHook(QObject *parent)
+    :HookBase(parent,RC_MOUSE)
 {
-    if (!isHooked) {
-        MouseCallback = callback;
-        HINSTANCE inst = GetModuleHandle(NULL);
-        hHook = NULL;
-        hHook = SetWindowsHookEx(
-                    WH_MOUSE_LL,
-                    H_MouseHookProc,
-                    inst,
-                    0);
-        if(hHook == NULL)
-            QMessageBox::information(
-                        0,
-                        "Information",
-                        "MouseHook failed with code "+
-                        QString::number(GetLastError()));
-        isHooked=true;
-    }
+    Self = this;
 }
 
-void MouseHook::StopHook()
+MouseHook::~MouseHook()
 {
-    if (hHook != NULL&&isHooked) {
-        if(!UnhookWindowsHookEx(hHook)) {
-            QMessageBox::information(
-                        0,
-                        "Information",
-                        "MouseHook failed with code "+
-                        QString::number(GetLastError()));
-        }
-        isHooked=false;
-    }
 }
 
-LRESULT CALLBACK MouseHook::H_MouseHookProc(
+LRESULT CALLBACK MouseHook::HookCallback(
         int nCode,
         WPARAM wParam,
         LPARAM lParam)
 {
     MSLLHOOKSTRUCT* ms = (MSLLHOOKSTRUCT*)lParam;
-    MouseHInfo mi{wParam,ms->pt,ms->mouseData};
-    MouseCallback(mi);
-    return CallNextHookEx(hHook,nCode,wParam, lParam);
+    MouseInfo* mi = new MouseInfo{wParam,ms->pt,ms->mouseData};
+    emit Self->MouseRecieve(mi);
+    if(Self->isReturnToSystem)
+        return CallNextHookEx(Self->hHook,nCode,wParam, lParam);
+    else
+        return 1;
 }
 
-
-void KeyboardHook::StartHook(void (*callback)(KeyboardHInfo))
+void MouseHook::ThrotleChangePreparing()
 {
-    if (!isHooked) {
-        KeyCallback = callback;
-        HINSTANCE inst = GetModuleHandle(NULL);
-        hHook = NULL;
-        hHook = SetWindowsHookEx(
-                    WH_KEYBOARD_LL,
-                    H_KeyHookProc,
-                    inst,
-                    0);
-        if(hHook == NULL)
-            QMessageBox::information(
-                        0,
-                        "Information",
-                        "KeyboardHook failed with code "+
-                        QString::number(GetLastError()));
-        isHooked=true;
-    }
+    //some code
 }
 
-void KeyboardHook::StopHook()
+HOOKPROC MouseHook::getHookProc()
 {
-    if (hHook != NULL && isHooked) {
-        if(!UnhookWindowsHookEx(hHook)) {
-            QMessageBox::information(
-                        0,
-                        "Information",
-                        "KeyboardHook failed with code "+
-                        QString::number(GetLastError()));
-        }
-        isHooked=false;
-    }
+    return MouseHook::HookCallback;
 }
 
-LRESULT CALLBACK KeyboardHook::H_KeyHookProc(
+KeyboardHook::KeyboardHook(QObject *parent)
+    :HookBase(parent,RC_KEYBOARD)
+{
+    Self = this;
+    KeyBuffer = QVector<int>(256,0);
+}
+
+KeyboardHook::~KeyboardHook()
+{
+}
+
+LRESULT CALLBACK KeyboardHook::HookCallback(
         int nCode,
         WPARAM wParam,
         LPARAM lParam)
 {
     KBDLLHOOKSTRUCT* ks = (KBDLLHOOKSTRUCT*)lParam;
-    qDebug() << nCode<<" "<<wParam<<" "<<ks->dwExtraInfo<<" "<<ks->flags<<" "<<ks->vkCode<<" "<<ks->scanCode<<" "<<VK_VOLUME_MUTE;
-    KeyboardHInfo ki{wParam,ks->vkCode,ks->flags};
-    if (isReturnToSystem) {
+    KeyboardInfo* ki = new KeyboardInfo{wParam,ks->vkCode,ks->flags};
+    if (Self->isReturnToSystem) {
         if (wParam==WM_KEYDOWN || wParam==WM_SYSKEYDOWN) {
-            KeyBuffer[ks->vkCode]=1;
+            Self->KeyBuffer[ks->vkCode]=1;
         }
         if (wParam==WM_KEYUP || wParam==WM_SYSKEYUP) {
-            KeyBuffer[ks->vkCode]=0;
+            Self->KeyBuffer[ks->vkCode]=0;
         }
     }
-    KeyCallback(ki);
-    if(isReturnToSystem)
-        return CallNextHookEx(hHook,nCode, wParam, lParam);
+    emit Self->KeyboardRecieve(ki);
+    if(Self->isReturnToSystem)
+        return CallNextHookEx(Self->hHook,nCode, wParam, lParam);
     else
         return 1;
 }
 
-bool KeyboardHook::SetKeyboardThrottle(bool throttle)
+void KeyboardHook::ThrotleChangePreparing()
 {
-    if (isHooked) {
-        for (int i=0; i<KeyBuffer.size();i++){
-            if (KeyBuffer[i]==1) {
-                INPUT ip;
-                ip.type = INPUT_KEYBOARD;
-                ip.ki.dwExtraInfo=0;
-                ip.ki.time=0;
-                ip.ki.wScan=0;
-                ip.ki.wVk=i;
-                ip.ki.dwFlags = KEYEVENTF_KEYUP;
-                SendInput(1, &ip, sizeof(INPUT));
-                KeyBuffer[i]=0;
-            }
+    for (int i=0; i<KeyBuffer.size();i++){
+        if (KeyBuffer[i]==1) {
+            INPUT ip;
+            ip.type = INPUT_KEYBOARD;
+            ip.ki.dwExtraInfo=0;
+            ip.ki.time=0;
+            ip.ki.wScan=0;
+            ip.ki.wVk=i;
+            ip.ki.dwFlags = KEYEVENTF_KEYUP;
+            SendInput(1, &ip, sizeof(INPUT));
+            KeyBuffer[i]=0;
         }
-        isReturnToSystem = !throttle;
-        return true;
     }
-    return false;
+}
+
+HOOKPROC KeyboardHook::getHookProc()
+{
+    return KeyboardHook::HookCallback;
+}
+
+HookManager::HookManager()
+{
+    connect(this, SIGNAL(SetMouseHook()),&Mouse,SLOT(StartHook()));
+    connect(this, SIGNAL(ReleaseMouseHook()),&Mouse,SLOT(StopHook()));
+    connect(this, SIGNAL(SetKeyboardHook()),&Keyboard,SLOT(StartHook()));
+    connect(this, SIGNAL(ReleaseKeyboardHook()),&Keyboard,SLOT(StopHook()));
+    connect(&Mouse,SIGNAL(MouseRecieve(MouseInfo*)),this,SLOT(MouseSlot(MouseInfo*)));
+    connect(&Keyboard,SIGNAL(KeyboardRecieve(KeyboardInfo*)),this,SLOT(KeyboardSlot(KeyboardInfo*)));
+    Mouse.moveToThread(&MouseThread);
+    Keyboard.moveToThread(&KeyboardThread);
+    MouseThread.start();
+    KeyboardThread.start();
+}
+
+HookManager::~HookManager()
+{
+    MouseThread.terminate();
+    KeyboardThread.terminate();
+}
+
+void HookManager::StartHook(int HookType)
+{
+    switch (HookType) {
+    case RC_MOUSE:
+        emit SetMouseHook();
+        break;
+    case RC_KEYBOARD:
+        emit SetKeyboardHook();
+        break;
+    default:
+        break;
+    }
+}
+
+void HookManager::StopHook(int HookType)
+{
+    switch (HookType) {
+    case RC_MOUSE:
+        if (Mouse.isHookInstalled()) {
+            Mouse.SetThrottleState(false);
+            emit ReleaseMouseHook();
+        }
+        break;
+    case RC_KEYBOARD:
+        if (Keyboard.isHookInstalled()) {
+            Keyboard.SetThrottleState(false);
+            emit ReleaseKeyboardHook();
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+bool HookManager::SetThrottleState(int HookType, bool NewState)
+{
+    switch (HookType) {
+    case RC_MOUSE:
+        return Mouse.SetThrottleState(NewState);
+    case RC_KEYBOARD:
+        return Keyboard.SetThrottleState(NewState);
+    default:
+        return false;
+    }
+}
+
+void HookManager::MouseSlot(MouseInfo *mi)
+{
+    emit MouseRecieve(mi);
+}
+
+void HookManager::KeyboardSlot(KeyboardInfo *ki)
+{
+    emit KeyboardRecieve(ki);
 }
