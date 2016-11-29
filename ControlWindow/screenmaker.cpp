@@ -2,19 +2,18 @@
 #include <QDebug>
 #include <QTime>
 #include <QThread>
+#include "windows.h"
+#include <QtWinExtras/QtWin>
 
 ScreenMaker::ScreenMaker(QObject *parent) : QObject(parent)
 {
     Timer = new QTimer(this);
     connect(Timer, SIGNAL(timeout()),this,SLOT(TimerCallback()));
-    QScreen *screen = QGuiApplication::primaryScreen();
-    if (screen) {
-        ScreenPixmap[0] = new QPixmap(screen->grabWindow(0));
-        QThread::sleep(5);
-        ScreenPixmap[1] = new QPixmap(screen->grabWindow(0));
-        //QPixmap *pic = new QPixmap(ScreenPixmap);
-
-    }
+    ScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+    ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+    ScreenPixmap[0] = nullptr;
+    ScreenPixmap[1] = nullptr;
+    GetPixmap(CurrentBuffer);
 }
 
 ScreenMaker::~ScreenMaker()
@@ -25,7 +24,7 @@ ScreenMaker::~ScreenMaker()
 void ScreenMaker::SetTimerState(bool state)
 {
     if (state) {
-        Timer->start(20);
+        Timer->start(40);
     }
     else {
         Timer->stop();
@@ -34,18 +33,33 @@ void ScreenMaker::SetTimerState(bool state)
 
 void ScreenMaker::TimerCallback()
 {
-    index = (index+1)%2;
-    //pix->fill(QColor(qrand()%255,qrand()%255,qrand()%255));
-    //ScreenPixmap = new QPixmap();
-    //ScreenPixmap->load("C:\\Users\\Admin\\Desktop\\TestVersion\\build\\ControlWindow\\debug\\1.png");
-    //emit DrawPixmap(ScreenPixmap);
-    //Timer->stop();
-
-    //emit DrawPixmap(0);
-    emit DrawPixmap(ScreenPixmap[index]);
+    emit DrawPixmap(ScreenPixmap[CurrentBuffer]);
+    CurrentBuffer = (CurrentBuffer+1)%2;
+    GetPixmap(CurrentBuffer);
 }
 
-/*void ScreenMaker::MainLoop()
+/*void ScreenMaker::GetPixmap(int index)
 {
-
+    QScreen *screen = QGuiApplication::primaryScreen();
+    if (screen) {
+        if (ScreenPixmap[index])
+            delete ScreenPixmap[index];
+        ScreenPixmap[index] = new QPixmap(screen->grabWindow(0));
+    }
 }*/
+
+void ScreenMaker::GetPixmap(int index)
+{
+    HDC hdc = GetDC(NULL);
+    HDC hCapture = CreateCompatibleDC(hdc);
+    HBITMAP hBitmap = CreateCompatibleBitmap(hdc, ScreenWidth, ScreenHeight);
+    SelectObject(hCapture, hBitmap);
+    BitBlt(hCapture,0,0,ScreenWidth,ScreenHeight,hdc,0,0,SRCCOPY);
+    if (ScreenPixmap[index])
+        delete ScreenPixmap[index];
+    QPixmap pic = QtWin::fromHBITMAP(hBitmap);
+    ScreenPixmap[index] = new QPixmap(pic);
+    DeleteObject(hBitmap);
+    DeleteObject(hCapture);
+    ReleaseDC(NULL,hdc);
+}

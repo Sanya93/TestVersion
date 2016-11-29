@@ -208,6 +208,7 @@ Makefile: ../../ControlWindow/ControlWindow.pro D:/Qt/Qt5.7.0/5.7/mingw53_32/mks
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/qtmaind.prl \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5OpenGL.prl \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Widgets.prl \
+		D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5WinExtras.prl \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Gui.prl \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Core.prl
 	$(QMAKE) -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" -o Makefile ..\..\ControlWindow\ControlWindow.pro
@@ -360,6 +361,7 @@ D:/Qt/Qt5.7.0/5.7/mingw53_32/mkspecs/features/lex.prf:
 D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/qtmaind.prl:
 D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5OpenGL.prl:
 D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Widgets.prl:
+D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5WinExtras.prl:
 D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Gui.prl:
 D:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Core.prl:
 qmake: FORCE

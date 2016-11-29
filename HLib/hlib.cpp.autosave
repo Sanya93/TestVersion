@@ -135,3 +135,23 @@ bool KeyboardHook::SetKeyboardThrottle(bool throttle)
     }
     return false;
 }
+
+HookManager::HookManager()
+{
+    
+}
+
+void HookManager::StartHook(int HookType)
+{
+    
+}
+
+void HookManager::StopHook(int HookType)
+{
+    
+}
+
+bool HookManager::SetThrottleState(int HookType, bool NewState)
+{
+    
+}

@@ -24,20 +24,19 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,&MainWindow::ReleaseKeyboardHook,&HookObject,&HookThreadObject::ReleaseKeyboardHook);
     connect(this,&MainWindow::SetScreencastState,&ScreenObject,&ScreenMaker::SetTimerState);
     connect(&ScreenObject,&ScreenMaker::DrawPixmap,this,&MainWindow::DrawPixmap);
-    //connect(ui->actionStart_2,&QAction::triggered,&ScreenObject,&ScreenMaker::setRuning);
     HookObject.moveToThread(&thr_Hook);
-    //ScreenObject.moveToThread(&thr_Screen);
+//    ScreenObject.moveToThread(&thr_Screen);
     thr_Hook.start();
-    //thr_Screen.start();
+//    thr_Screen.start();
 }
 
 MainWindow::~MainWindow()
 {
     emit SetScreencastState(false);
-    //QThread::sleep(1);
+//    QThread::sleep(1);
     delete ui;
     thr_Hook.terminate();
-    //thr_Screen.terminate();
+//    thr_Screen.terminate();
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)

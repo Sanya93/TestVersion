@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui opengl winextras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,6 +24,8 @@ HEADERS  += mainwindow.h \
     screenmaker.h
 
 FORMS    += mainwindow.ui
+
+LIBS += -lgdi32
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../HLib/release/ -lHLib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../HLib/debug/ -lHLib

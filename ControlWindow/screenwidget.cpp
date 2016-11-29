@@ -17,6 +17,7 @@ ScreenWidget::~ScreenWidget()
 
 void ScreenWidget::DrawPixmap(QPixmap *pixmap)
 {
+    deleteTexture(texId);
     texId = bindTexture(*pixmap);
 //    delete pixmap;
     update();
