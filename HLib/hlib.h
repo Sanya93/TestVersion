@@ -7,25 +7,29 @@
 #include <QThread>
 #include <QDebug>
 #include <QMessageBox>
+#include <QMetaObject>
 #include "hookbase.h"
+
+#define RC_MOUSE 14
+#define RC_KEYBOARD 13
 
 struct HLIBSHARED_EXPORT MouseInfo
 {
 public:
-    WPARAM wParam;
-    POINT Point;
+    WPARAM   wParam;
+    POINT     Point;
     DWORD MouseData;
 };
 
 struct HLIBSHARED_EXPORT KeyboardInfo
 {
 public:
-    WPARAM wParam;
+    WPARAM    wParam;
     DWORD VirtualKey;
-    DWORD Flags;
+    DWORD      Flags;
 };
 
-class MouseHook: public HookBase
+class  MouseHook: public HookBase
 {
     Q_OBJECT
 public:
@@ -38,7 +42,9 @@ protected:
     HOOKPROC getHookProc();
 private:
     static MouseHook* Self;
-    static LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK HookCallback(int nCode,
+                                         WPARAM wParam,
+                                         LPARAM lParam);
 };
 
 class KeyboardHook: public HookBase
@@ -55,7 +61,9 @@ protected:
 private:
     static KeyboardHook* Self;
     QVector<int> KeyBuffer;
-    static LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK HookCallback(int nCode,
+                                         WPARAM wParam,
+                                         LPARAM lParam);
 };
 
 class HLIBSHARED_EXPORT HookManager: public QObject
@@ -64,23 +72,8 @@ class HLIBSHARED_EXPORT HookManager: public QObject
 public:
     HookManager();
     ~HookManager();
-    void StartHook(int HookType);
-    void StopHook(int HookType);
-    bool SetThrottleState(int HookType, bool NewState);
-signals:
-    void MouseRecieve(MouseInfo* mi);
-    void KeyboardRecieve(KeyboardInfo* ki);
-    void SetMouseHook();
-    void ReleaseMouseHook();
-    void SetKeyboardHook();
-    void ReleaseKeyboardHook();
- private:
-    QThread MouseThread, KeyboardThread;
-    MouseHook Mouse;
-    KeyboardHook Keyboard;
-private slots:
-    void MouseSlot(MouseInfo* mi);
-    void KeyboardSlot(KeyboardInfo* ki);
+    static MouseHook Mouse;
+    static KeyboardHook Keyboard;
 };
 
 #endif // HLIB_H

@@ -53,8 +53,8 @@ static const uint qt_meta_data_HookBase[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   24,    2, 0x0a /* Public */,
-       3,    0,   25,    2, 0x0a /* Public */,
+       1,    0,   24,    2, 0x09 /* Protected */,
+       3,    0,   25,    2, 0x09 /* Protected */,
 
  // slots: parameters
     QMetaType::Void,

@@ -19,8 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->ScreenBox->installEventFilter(this);
     connect(this,&MainWindow::SetScreencastState,&ScreenObject,&ScreenMaker::SetTimerState);
     connect(&ScreenObject,&ScreenMaker::DrawPixmap,this,&MainWindow::DrawPixmap);
-    connect(&HManager,SIGNAL(MouseRecieve(MouseInfo*)),this,SLOT(MouseHookCallback(MouseInfo*)));
-    connect(&HManager,SIGNAL(KeyboardRecieve(KeyboardInfo*)),this,SLOT(KeyHookCallback(KeyboardInfo*)));
+    connect(&HookManager::Mouse,SIGNAL(MouseRecieve(MouseInfo*)),this,SLOT(MouseHookCallback(MouseInfo*)));
+    connect(&HookManager::Keyboard,SIGNAL(KeyboardRecieve(KeyboardInfo*)),this,SLOT(KeyHookCallback(KeyboardInfo*)));
 //    ScreenObject.moveToThread(&thr_Screen);
 //    thr_Screen.start();
 }
@@ -106,29 +106,29 @@ void MainWindow::DrawPixmap(QPixmap *pixmap)
 
 void MainWindow::on_actionStartHook_triggered()
 {
-    HManager.StartHook(RC_KEYBOARD);
+    HookManager::Keyboard.InitHook();
 }
 
 void MainWindow::on_actionStopHook_triggered()
 {
-     HManager.StopHook(RC_KEYBOARD);
+    HookManager::Keyboard.DestroyHook();
      ui->actionThrottle->setChecked(false);
 }
 
 void MainWindow::on_actionThrottle_triggered(bool checked)
 {
-    if (!HManager.SetThrottleState(RC_KEYBOARD,checked))
+    if (!HookManager::Keyboard.SetThrottleState(checked))
         ui->actionThrottle->setChecked(false);
 }
 
 void MainWindow::on_actionStart_triggered()
 {
-    HManager.StartHook(RC_MOUSE);
+    HookManager::Mouse.InitHook();
 }
 
 void MainWindow::on_actionStop_triggered()
 {
-    HManager.StopHook(RC_MOUSE);
+    HookManager::Mouse.DestroyHook();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

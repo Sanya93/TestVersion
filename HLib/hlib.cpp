@@ -3,6 +3,9 @@
 KeyboardHook* KeyboardHook::Self;
 MouseHook* MouseHook::Self;
 
+MouseHook HookManager::Mouse;
+KeyboardHook HookManager::Keyboard;
+
 MouseHook::MouseHook(QObject *parent)
     :HookBase(parent,RC_MOUSE)
 {
@@ -94,76 +97,8 @@ HOOKPROC KeyboardHook::getHookProc()
 
 HookManager::HookManager()
 {
-    connect(this, SIGNAL(SetMouseHook()),&Mouse,SLOT(StartHook()));
-    connect(this, SIGNAL(ReleaseMouseHook()),&Mouse,SLOT(StopHook()));
-    connect(this, SIGNAL(SetKeyboardHook()),&Keyboard,SLOT(StartHook()));
-    connect(this, SIGNAL(ReleaseKeyboardHook()),&Keyboard,SLOT(StopHook()));
-    connect(&Mouse,SIGNAL(MouseRecieve(MouseInfo*)),this,SLOT(MouseSlot(MouseInfo*)));
-    connect(&Keyboard,SIGNAL(KeyboardRecieve(KeyboardInfo*)),this,SLOT(KeyboardSlot(KeyboardInfo*)));
-    Mouse.moveToThread(&MouseThread);
-    Keyboard.moveToThread(&KeyboardThread);
-    MouseThread.start();
-    KeyboardThread.start();
 }
 
 HookManager::~HookManager()
 {
-    MouseThread.terminate();
-    KeyboardThread.terminate();
-}
-
-void HookManager::StartHook(int HookType)
-{
-    switch (HookType) {
-    case RC_MOUSE:
-        emit SetMouseHook();
-        break;
-    case RC_KEYBOARD:
-        emit SetKeyboardHook();
-        break;
-    default:
-        break;
-    }
-}
-
-void HookManager::StopHook(int HookType)
-{
-    switch (HookType) {
-    case RC_MOUSE:
-        if (Mouse.isHookInstalled()) {
-            Mouse.SetThrottleState(false);
-            emit ReleaseMouseHook();
-        }
-        break;
-    case RC_KEYBOARD:
-        if (Keyboard.isHookInstalled()) {
-            Keyboard.SetThrottleState(false);
-            emit ReleaseKeyboardHook();
-        }
-        break;
-    default:
-        break;
-    }
-}
-
-bool HookManager::SetThrottleState(int HookType, bool NewState)
-{
-    switch (HookType) {
-    case RC_MOUSE:
-        return Mouse.SetThrottleState(NewState);
-    case RC_KEYBOARD:
-        return Keyboard.SetThrottleState(NewState);
-    default:
-        return false;
-    }
-}
-
-void HookManager::MouseSlot(MouseInfo *mi)
-{
-    emit MouseRecieve(mi);
-}
-
-void HookManager::KeyboardSlot(KeyboardInfo *ki)
-{
-    emit KeyboardRecieve(ki);
 }

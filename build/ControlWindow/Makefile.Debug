@@ -217,6 +217,7 @@ debug/moc_mainwindow.cpp: D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMainWi
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMessageBox \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qmessagebox.h \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qdialog.h \
+		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QMetaObject \
 		../../HLib/hookbase.h \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QObject \
 		../../ControlWindow/screenmaker.h \
@@ -473,6 +474,7 @@ debug/main.o: ../../ControlWindow/main.cpp ../../ControlWindow/mainwindow.h \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMessageBox \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qmessagebox.h \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qdialog.h \
+		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QMetaObject \
 		../../HLib/hookbase.h \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QObject \
 		../../ControlWindow/screenmaker.h \
@@ -609,6 +611,7 @@ debug/mainwindow.o: ../../ControlWindow/mainwindow.cpp ../../ControlWindow/mainw
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMessageBox \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qmessagebox.h \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qdialog.h \
+		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QMetaObject \
 		../../HLib/hookbase.h \
 		D:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QObject \
 		../../ControlWindow/screenmaker.h \

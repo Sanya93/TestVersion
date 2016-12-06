@@ -36,7 +36,6 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 private:
     Ui::MainWindow *ui;
-    HookManager HManager;
     QThread thr_Screen;
     ScreenMaker ScreenObject;
     int SCREEN_WIDTH = 1, SCREEN_HEIGHT = 1;

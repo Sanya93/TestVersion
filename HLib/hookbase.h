@@ -4,12 +4,12 @@
 #include <QObject>
 #include <QMessageBox>
 #include <QDebug>
+#include <QThread>
+#include <QMetaObject>
 #include "windows.h"
+#include "hlib_global.h"
 
-#define RC_MOUSE 14
-#define RC_KEYBOARD 13
-
-class HookBase : public QObject
+class HLIBSHARED_EXPORT HookBase : public QObject
 {
     Q_OBJECT
 public:
@@ -18,14 +18,19 @@ public:
     bool SetThrottleState(bool NewState);
     bool isHookInstalled();
     bool ThrottleState();
-public slots:
+    void InitHook();
+    void DestroyHook();
+protected slots:
     void StartHook();
     void StopHook();
 protected:
     virtual void ThrotleChangePreparing() = 0;
     virtual HOOKPROC getHookProc() = 0;
     HHOOK hHook;
-    bool isReturnToSystem;
+    bool isReturnToSystem = true;
+
+    QThread *o_thread;
+    QThread *p_thread;
 private:
     int HookType;
     bool isHooked;
